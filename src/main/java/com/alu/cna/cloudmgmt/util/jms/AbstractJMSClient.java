@@ -58,16 +58,18 @@ public abstract class AbstractJMSClient implements ExceptionListener
     private static final String MESSAGE_SELECTOR = "message_selector";
 
     protected static String jmsHostList = null;
-    protected static int jmsPort = 4447;
+    // ActiveMQ Open wire connector port
+    protected static int jmsPort = 61616;
     protected static String propFile = "jmsclient.properties";
 
     // ////////////////////////////////////////
 
-    private static final String JMS_VALIDATION_ERROR = "HQ119061";
+    private static final String JMS_VALIDATION_ERROR = "Unable to validate user";
     private static final String DEFAULT_JMS_USERNAME = "jmsclient@csp";
     private static final String DEFAULT_JMS_PASSWORD = "clientpass";
-    private static final String INITIAL_CONTEXT_FACTORY = "org.jboss.naming.remote.client.InitialContextFactory";
-    private static final String PROVIDER_URL_FMT = "remote://%s:%d";
+    private static final String INITIAL_CONTEXT_FACTORY = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
+    private static final String PROVIDER_URL_FMT = "tcp://%s:%d?wireFormat.cacheEnabled=false&wireFormat.tightEncodingEnabled=false";
+    private static final String FAILOVER_URL_FMT = "failover:(%s)?maxReconnectDelay=1000";
 
     private static final int PROPERTIES_REFRESH = 10000; // poll every 10 seconds for property change.
 
@@ -76,7 +78,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
     public static double reconnectDelayFactor = 2;
 
     protected String topicName = "jms/topic/CNAMessages";
-    protected String jmsRemoteFactory = "jms/RemoteConnectionFactory";
+    protected String jmsRemoteFactory = "ConnectionFactory";
 
     protected String messageSelector = null;
 
@@ -169,7 +171,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
     {
         if (args.length == 0)
         {
-            System.err.println("host name or IP must be specified");
+            System.err.println("*** host name or IP must be specified ***");
             usage();
             System.exit(-2);
         }
@@ -180,7 +182,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
             try
             {
                 Integer.parseInt(jmsHostList);
-                System.err.println("Invalid host name or IP");
+                System.err.println("*** Invalid host name or IP ***");
                 usage();
                 System.exit(-2);
             }
@@ -198,7 +200,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
             }
             catch (NumberFormatException ne)
             {
-                System.err.println("Invalid port number");
+                System.err.println("*** Invalid port number ***");
                 usage();
                 System.exit(-2);
             }
@@ -286,7 +288,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
         }
         catch (Exception e)
         {
-            System.err.println("Error loading property file: " + propFile);
+            System.err.println("*** Error loading property file: " + propFile + " ***");
             e.printStackTrace();
             usage();
             System.exit(-2);
@@ -307,7 +309,16 @@ public abstract class AbstractJMSClient implements ExceptionListener
 
         // remove the last comma.
         urls.deleteCharAt(urls.length()-1);
-        providerUrl = urls.toString();
+        // If there is more than one JMS host, then use fail over transport to connect to
+        // the Master broker.
+        if (jmsHosts.length > 1)
+        {
+            providerUrl = String.format(FAILOVER_URL_FMT, urls);
+        }
+        else
+        {
+            providerUrl = urls.toString();
+        }
 
         reconnectWaitIntervalSecs = Integer.parseInt(configProperties.getProperty("reconnect_wait_interval_secs",
                 Integer.toString(reconnectWaitIntervalSecs)));
@@ -387,9 +398,9 @@ public abstract class AbstractJMSClient implements ExceptionListener
                 if (e instanceof JMSSecurityException)
                 {
                     JMSSecurityException se = (JMSSecurityException) e;
-                    if (se.getMessage().startsWith(JMS_VALIDATION_ERROR))
+                    if (se.getMessage().contains(JMS_VALIDATION_ERROR))
                     {
-                        throw new Exception("invalid username or password", se);
+                        throw new Exception("Authentication failed", se);
                     }
                 }
                 if (attempt < connectAttempts)
@@ -517,7 +528,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
         return prop;
     }
 
-    private static void usage()
+    public static void usage()
     {
         String usageString =
         "Usage: runjmsclient.sh [-durable|-queue] [-Dproperty.file=<properties file>] [-Dlog.file.path=<logfile directory>] " +
@@ -529,11 +540,11 @@ public abstract class AbstractJMSClient implements ExceptionListener
         "         If connection to a host fails, the next available in the list will be tried. This happens even if the" + NL +
         "         connection fails while the JMS client is running" + NL +
         NL +
-        "    -durable : to establish durable connection" + NL +
+        "    -durable : to establish durable connection. The client.name and client.id parameters are mandatory for durable connections" + NL +
         NL +
         "    -queue : to establish a connection to a JMS queue" + NL +
         NL +
-        "    default jms_port : 4447" + NL +
+        "    default jms_port : 61616" + NL +
         NL +
         "    default property.file : <script directory>/jmsclient.properties" + NL +
         "        If the property.file is specified and does not start with absolute path name," + NL +
@@ -544,9 +555,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
         NL +
         "    default log.file : jmsclient.log" + NL +
         NL +
-        "    default client.id : random uuid" + NL +
-        NL +
-        "    default client.name : DurableJMSTopicClient. client name is used only if the connection is durable"
+        "    default client.id : random uuid, for durable connections, this value must be supplied on the command line"
         ;
         System.err.println(usageString);
     }

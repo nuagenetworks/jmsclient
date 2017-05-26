@@ -40,10 +40,11 @@ public class DurableJMSTopicClient extends AbstractJMSClient  implements Excepti
     {
         _mainThread = Thread.currentThread();
         String clientName = System.getProperty("client.name");
-        if (StringUtils.isBlank(clientName))
+        if (StringUtils.isBlank(clientName) || StringUtils.isBlank(System.getProperty("client.id")))
         {
-            clientName = DurableJMSTopicClient.class.getSimpleName();
-            System.setProperty("client.name", clientName);
+            System.err.println("*** client.name and client.id parameters are mandatory for durable connections ***");
+            usage();
+            System.exit(-2);
         }
 
         parseArgs(args);
