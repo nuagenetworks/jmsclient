@@ -1,3 +1,7 @@
+Please find the sample JMS client in the below location:
+
+https://github.com/nuagenetworks/jmsclient/releases/tag/R5.0
+
 This is a sample code to run a JMS client and receive messages on a subscription channel.
 
 To use it:
