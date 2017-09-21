@@ -19,7 +19,7 @@ option:
 jms_username = jmsclient@csp   # since in step 2 above, 'jmsclient' was added to the csp organizaion.
 jms_password = <the password for the user>
 
-4. For TLS support, copy the truststore from VSD "opt/vsd/jboss/standalone/configuration/vsd/truststore" and place it in JMS client location (For eg : /root/TLS_JMS/vsd.truststore) . You need to add truststore_location in jmsclient.properties as shown below
+4. For TLS support, copy the truststore from VSD "/opt/vsd/jboss/standalone/configuration/vsd.truststore" and place it in JMS client location (For eg : /root/TLS_JMS/vsd.truststore) . You need to add truststore_location in jmsclient.properties as shown below
 
 truststore_location = /root/TLS_JMS/vsd.truststore
 
