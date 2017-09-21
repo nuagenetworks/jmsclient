@@ -2,7 +2,7 @@ Please find the sample JMS client in the below location:
 
 https://github.com/nuagenetworks/jmsclient/releases/tag/R5.0
 
-Download "jmsclient-1.0.8.zip" from the above location
+Download "jmsclient-1.0.8-tls.zip" from the above location
 
 This is a sample code to run a JMS client and receive messages on a subscription channel.
 
@@ -19,15 +19,17 @@ option:
 jms_username = jmsclient@csp   # since in step 2 above, 'jmsclient' was added to the csp organizaion.
 jms_password = <the password for the user>
 
-4. Make sure port 61616 is open in iptables for this client machine
+4. For TLS support, copy the truststore from VSD and place it in JMS client location. You need to add truststore_location in jmsclient.properties. 
+
+5. Make sure port 61616 is open in iptables for this client machine
 ipset add vsd <ip address of the JMS client machine>
 
-5. Next change directory to:
+6. Next change directory to:
 jmsclient-${project.version}
 
 and run:
 
-6. ./runjmsclient.sh [-durable|-queue] [-Dproperty.file=propertyfile] [-Dlog.file.path=logfile_directory] [-Dlog.file=logfilename] h1_or_ip1[,h2_or_ip2,h3_or_ip3] [jms port]
+7. ./runjmsclient.sh [-durable|-queue] [-Dproperty.file=propertyfile] [-Dlog.file.path=logfile_directory] [-Dlog.file=logfilename] h1_or_ip1[,h2_or_ip2,h3_or_ip3] [jms port]
 
 The only mandatory argument is the JMS Server host name or ip.
 
@@ -56,6 +58,9 @@ If you want to use the filter version
 =====================================
 ./runjmsclient.sh <other options> -Dproperty.file=jmsfilter.properties <host_or_ip_list>
 
+For TLS Support
+===============
+./runjmsclient.sh <other options> -Dproperty.file=jmsfilter.properties <host_or_ip_list> 61619
 
 Setting log level
 =================
