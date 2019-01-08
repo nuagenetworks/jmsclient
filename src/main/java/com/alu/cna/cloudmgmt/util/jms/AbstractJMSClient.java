@@ -56,6 +56,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
     private static final String JMS_USERNAME = "jms_username";
     private static final String JMS_PASSWORD = "jms_password";
     private static final String MESSAGE_SELECTOR = "message_selector";
+    private static final String TRUSTSTORE_LOCATION = "truststore_location";
 
     protected static String jmsHostList = null;
     // ActiveMQ Open wire connector port
@@ -69,6 +70,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
     private static final String DEFAULT_JMS_PASSWORD = "clientpass";
     private static final String INITIAL_CONTEXT_FACTORY = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
     private static final String PROVIDER_URL_FMT = "tcp://%s:%d?wireFormat.cacheEnabled=false&wireFormat.tightEncodingEnabled=false";
+    private static final String PROVIDER_URL_TLS = "ssl://%s:%d";
     private static final String FAILOVER_URL_FMT = "failover:(%s)?maxReconnectDelay=1000";
 
     private static final int PROPERTIES_REFRESH = 10000; // poll every 10 seconds for property change.
@@ -81,6 +83,9 @@ public abstract class AbstractJMSClient implements ExceptionListener
     protected String jmsRemoteFactory = "ConnectionFactory";
 
     protected String messageSelector = null;
+
+    protected String trustStoreLocation = null;
+    protected Boolean isSslConnection = false;
 
     protected Connection conn = null;
     protected Session session = null;
@@ -133,6 +138,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
             waitForShutDown();
         }
         catch (Exception e)
+
         {
             getLogger().error(e.getMessage(), e);
             System.exit(1);
@@ -213,7 +219,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
         {
             URL propUrl = AbstractJMSClient.class.getResource(File.separator + propFile);
             if (propUrl != null)
-                propFile = AbstractJMSClient.class.getResource(File.separator + propFile).getPath();
+                propFile = propUrl.getPath();
         }
     }
 
@@ -299,11 +305,22 @@ public abstract class AbstractJMSClient implements ExceptionListener
         jmsPassword = configProperties.getProperty(JMS_PASSWORD, jmsPassword);
         messageSelector = configProperties.getProperty(MESSAGE_SELECTOR);
 
+        trustStoreLocation = configProperties.getProperty(TRUSTSTORE_LOCATION);
+
+        String lProviderUrlFormat = PROVIDER_URL_FMT;
+        if (trustStoreLocation != null && !trustStoreLocation.isEmpty())
+        {
+            getLogger().debug("Connecting through SSL, Using the truststore location: "+ trustStoreLocation);
+            isSslConnection = true;
+            lProviderUrlFormat = PROVIDER_URL_TLS;
+            System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
+        }
+
         String[] jmsHosts = jmsHostList.split(",");
         StringBuilder urls = new StringBuilder();
         for (String jmsHost: jmsHosts)
         {
-            String url = String.format(PROVIDER_URL_FMT, jmsHost, jmsPort);
+            String url = String.format(lProviderUrlFormat, jmsHost, jmsPort);
             urls.append(url).append(",");
         }
 
