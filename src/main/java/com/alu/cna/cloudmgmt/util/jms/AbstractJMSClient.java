@@ -21,9 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.jms.Connection;
+import java.util.concurrent.atomic.AtomicInteger; import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
@@ -70,7 +68,7 @@ public abstract class AbstractJMSClient implements ExceptionListener
     private static final String DEFAULT_JMS_PASSWORD = "clientpass";
     private static final String INITIAL_CONTEXT_FACTORY = "org.apache.activemq.jndi.ActiveMQInitialContextFactory";
     private static final String PROVIDER_URL_FMT = "tcp://%s:%d?wireFormat.cacheEnabled=false&wireFormat.tightEncodingEnabled=false";
-    private static final String PROVIDER_URL_TLS = "ssl://%s:%d";
+    private static final String PROVIDER_URL_TLS = "ssl://%s:%d?socket.verifyHostName=false";
     private static final String FAILOVER_URL_FMT = "failover:(%s)?maxReconnectDelay=1000";
 
     private static final int PROPERTIES_REFRESH = 10000; // poll every 10 seconds for property change.
