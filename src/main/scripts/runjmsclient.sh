@@ -46,7 +46,7 @@ The only mandatory argument is the JMS Server host name or ip
 
     -queue : to establish a connection to a JMS queue
 
-    default jms_port : 4447
+    default jms_port : 61616
 
     default property.file : <script directory>/jmsclient.properties
         The property.file contains JMS client parameters such as user name, password, any topic filters etc.

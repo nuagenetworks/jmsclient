@@ -72,6 +72,7 @@ public class JMSMessageHandler implements MessageListener
                 params.append("\n");
             }
             log.debug("message params: {}", params.toString());
+            log.debug("message ID: {}", msg.getJMSMessageID());
             if (msg instanceof TextMessage)
             {
                 log.debug("message body: {}", ((TextMessage) msg).getText());
