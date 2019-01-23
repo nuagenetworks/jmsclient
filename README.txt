@@ -32,7 +32,7 @@ jmsclient-${project.version}
 
 and run:
 
-7. ./runjmsclient.sh [-durable|-queue] [-Dproperty.file=propertyfile] [-Dlog.file.path=logfile_directory] [-Dlog.file=logfilename] h1_or_ip1[,h2_or_ip2,h3_or_ip3] [jms port]
+7. ./runjmsclient.sh [-durable] [-Dproperty.file=propertyfile] [-Dlog.file.path=logfile_directory] [-Dlog.file=logfilename] h1_or_ip1[,h2_or_ip2,h3_or_ip3] [jms port]
 
 The only mandatory argument is the JMS Server host name or ip.
 
@@ -42,7 +42,6 @@ in the format : h1_or_ip1,h2_or_ip2,h3_or_ip3
 The client would automatically connect to the master JMS server.
 
 -durable : to establish durable connection
--queue   : to establish a connection to a JMS queue
 
 default jms_port : 61616
 default property.file : <script directory>/jmsclient.properties
