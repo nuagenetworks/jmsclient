@@ -1,6 +1,6 @@
 Please find the sample JMS client in the below location:
 
-https://github.com/nuagenetworks/jmsclient/releases/tag/R5.4.1
+https://github.com/nuagenetworks/jmsclient/releases/tag/6.0.3
 
 Download "jmsclient-1.0.11-dist.zip" from the above location
 
